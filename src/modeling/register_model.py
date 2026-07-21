@@ -21,7 +21,7 @@ import os
 # Set up MLflow tracking URI
 # mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
 mlflow.set_tracking_uri('http://127.0.0.1:5000/')
-
+alias = 'development'
 
 # logging configuration
 logger = logging.getLogger('model_registration')
@@ -66,11 +66,11 @@ def register_model(model_name: str, model_info: dict):
         client = mlflow.tracking.MlflowClient()
         client.set_registered_model_alias(
             name=model_name,
-            alias="staging",
+            alias="development",
             version=model_version.version
         )
         
-        logger.debug(f'Model {model_name} version {model_version.version} registered and alias "staging" set.')
+        logger.debug(f'Model {model_name} version {model_version.version} registered and alias {alias} set.')
     except Exception as e:
         logger.error('Error during model registration: %s', e)
         raise

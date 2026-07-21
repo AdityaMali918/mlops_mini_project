@@ -1,4 +1,4 @@
 [core]
     remote = myremote
 ['remote "myremote"']
-    url = D:\NEW_PROJECTS\mlops_mini_project\mlops_mini_project\data\temp
+    url = s3://aditya10-demo-s3

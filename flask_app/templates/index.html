@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Sentiment Analysis</title>
+    </head>
+    <body>
+        <h3>Enter the sentence to get sentiment analysis</h3>
+        <form action="/predict" method="POST">
+            <label >Write test</label><br>
+            <textarea name="text" id="" cols="30" rows="10"></textarea><br>
+            <input type="submit" value="Predict">
+        </form>
+        {% if result is not none %}
+            {% if result == 1 %}
+                <h2>Happy</h2>
+            {% else %}
+                <h2>Sad</h2>
+            {% endif %}
+        {% endif %}
+    </body>
+</html>

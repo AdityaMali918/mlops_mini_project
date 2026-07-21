@@ -1,4 +1,7 @@
 notebooks/mlflow.db
+models
+mlruns
+mlflow.db
 
 # Data
 /data/
