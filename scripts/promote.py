@@ -1,59 +1,186 @@
+# import os
+# import mlflow
+# from dotenv import load_dotenv
+
+# load_dotenv()
+# def promote_model():
+#     # mlflow.set_tracking_uri("http://127.0.0.1:5000")
+
+#     dagshub_token = os.getenv("DAGSHUB_PAT")
+#     if not dagshub_token:
+#         raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+
+#     os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+#     os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+#     dagshub_url = "https://dagshub.com"
+#     repo_owner = "AdityaMali918"
+#     repo_name = "mlops_mini_project"
+
+#     # Set up MLflow tracking URI
+#     mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+
+#     client = mlflow.MlflowClient()
+#     # client = mlflow.MlflowClient()
+
+#     model_name = "my_model"
+
+#     # Get current development model
+#     dev_model = client.get_model_version_by_alias(
+#         model_name,
+#         "development"
+#     )
+
+#     # Check if a production model already exists
+#     try:
+#         prod_model = client.get_model_version_by_alias(
+#             model_name,
+#             "production"
+#         )
+
+#         # Move old production to archived
+#         client.set_registered_model_alias(
+#             name=model_name,
+#             alias="archived",
+#             version=prod_model.version
+#         )
+
+#     except Exception:
+#         # No production model yet
+#         pass
+
+#     # Promote development to production
+#     client.set_registered_model_alias(
+#         name=model_name,
+#         alias="production",
+#         version=dev_model.version
+#     )
+
+#     print(f"Version {dev_model.version} promoted to production.")
+
+import logging
 import os
+
 import mlflow
+from mlflow import MlflowClient
+from mlflow.exceptions import MlflowException
 from dotenv import load_dotenv
 
+
+# ----------------------------
+# Load environment variables
+# ----------------------------
 load_dotenv()
-def promote_model():
-    # mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
-    dagshub_token = os.getenv("DAGSHUB_PAT")
-    if not dagshub_token:
-        raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+dagshub_token = os.getenv("DAGSHUB_PAT")
+if not dagshub_token:
+    raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
 
-    os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-    os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
-    dagshub_url = "https://dagshub.com"
-    repo_owner = "AdityaMali918"
-    repo_name = "mlops_mini_project"
 
-    # Set up MLflow tracking URI
-    mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+# ----------------------------
+# MLflow Configuration
+# ----------------------------
+DAGSHUB_URL = "https://dagshub.com"
+REPO_OWNER = "AdityaMali918"
+REPO_NAME = "mlops_mini_project"
 
-    client = mlflow.MlflowClient()
-    # client = mlflow.MlflowClient()
+mlflow.set_tracking_uri(
+    f"{DAGSHUB_URL}/{REPO_OWNER}/{REPO_NAME}.mlflow"
+)
 
-    model_name = "my_model"
+client = MlflowClient()
 
-    # Get current development model
-    dev_model = client.get_model_version_by_alias(
-        model_name,
-        "development"
+
+# ----------------------------
+# Logging Configuration
+# ----------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
+logger = logging.getLogger(__name__)
+
+
+# ----------------------------
+# Promotion Function
+# ----------------------------
+def promote_model(model_name: str):
+    """
+    Promote the model assigned to the 'development' alias
+    to the 'production' alias.
+
+    If another production model exists, move it to 'archived'.
+    """
+
+    # Get the development model
+    try:
+        dev_model = client.get_model_version_by_alias(
+            model_name,
+            "development",
+        )
+    except MlflowException:
+        logger.error(
+            "No model is assigned to the 'development' alias."
+        )
+        return
+
+    logger.info(
+        "Development model version: %s",
+        dev_model.version,
     )
 
-    # Check if a production model already exists
+    # Check if a production model exists
     try:
         prod_model = client.get_model_version_by_alias(
             model_name,
-            "production"
+            "production",
         )
 
-        # Move old production to archived
-        client.set_registered_model_alias(
-            name=model_name,
-            alias="archived",
-            version=prod_model.version
+        logger.info(
+            "Current production version: %s",
+            prod_model.version,
         )
 
-    except Exception:
-        # No production model yet
-        pass
+        # Archive only if it's a different version
+        if prod_model.version != dev_model.version:
+            client.set_registered_model_alias(
+                name=model_name,
+                alias="archived",
+                version=prod_model.version,
+            )
 
-    # Promote development to production
+            logger.info(
+                "Archived previous production version %s",
+                prod_model.version,
+            )
+        else:
+            logger.info(
+                "Development model is already in production."
+            )
+
+    except MlflowException:
+        logger.info("No production model found.")
+
+    # Promote development -> production
     client.set_registered_model_alias(
         name=model_name,
         alias="production",
-        version=dev_model.version
+        version=dev_model.version,
     )
 
-    print(f"Version {dev_model.version} promoted to production.")
+    logger.info(
+        "Successfully promoted version %s to production.",
+        dev_model.version,
+    )
+
+
+# ----------------------------
+# Main
+# ----------------------------
+if __name__ == "__main__":
+    MODEL_NAME = "my_model"
+    promote_model(MODEL_NAME)

@@ -124,7 +124,7 @@ def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
         raise
 
 def main():
-    mlflow.set_experiment("dvc-pipeline")
+    mlflow.set_experiment("dvc-pipeline-v2")
     with mlflow.start_run() as run:  # Start an MLflow run
         try:
             clf = load_model('./models/model.pkl')
@@ -149,13 +149,26 @@ def main():
             
             # Log model to MLflow
             # mlflow.sklearn.log_model(clf, "model")
-            mlflow.sklearn.log_model(
+            # mlflow.sklearn.log_model(
+            #     sk_model=clf,
+            #     name="model"
+            # )
+            logged_model = mlflow.sklearn.log_model(
                 sk_model=clf,
                 name="model"
             )
-            
+
+            print(type(logged_model))
+            print(logged_model)
+            print("URI:", logged_model.model_uri)
+
+            save_model_info(
+                run.info.run_id,
+                logged_model.model_uri,
+                "reports/experiment_info.json"
+            )
             # Save model info
-            save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
+            # save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
             
             # Log the metrics file to MLflow
             mlflow.log_artifact('reports/metrics.json')

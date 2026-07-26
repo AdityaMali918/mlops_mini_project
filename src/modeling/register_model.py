@@ -70,10 +70,14 @@ def register_model(model_name: str, model_info: dict):
         model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
         
         # Register the model
-        model_version = mlflow.register_model(model_uri, model_name)
+        # model_version = mlflow.register_model(model_uri, model_name)
+        model_version = mlflow.register_model(
+            model_uri=model_info["model_path"],
+            name="my_model"
+        )
         
         # Set an alias instead of a stage
-        client = mlflow.tracking.MlflowClient()
+        # client = mlflow.tracking.MlflowClient()
         client.set_registered_model_alias(
             name=model_name,
             alias="development",
@@ -87,7 +91,7 @@ def register_model(model_name: str, model_info: dict):
 
 def main():
     try:
-        model_info_path = 'reports/experiment_info.json'
+        model_info_path = './reports/experiment_info.json'
         model_info = load_model_info(model_info_path)
         
         model_name = "my_model"
