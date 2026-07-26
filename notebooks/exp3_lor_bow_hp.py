@@ -15,7 +15,25 @@ from nltk.stem import WordNetLemmatizer
 import numpy as np
 import os
 
-mlflow.set_tracking_uri('http://127.0.0.1:5000/')
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# mlflow.set_tracking_uri('http://127.0.0.1:5000/')
+
+dagshub_token = os.getenv("DAGSHUB_PAT")
+if not dagshub_token:
+        raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "AdityaMali918"
+repo_name = "mlops_mini_project"
+
+# Set up MLflow tracking URI
+mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
 
 # Load the data
 # Load the data

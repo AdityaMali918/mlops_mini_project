@@ -22,5 +22,27 @@ jobs:
                 pip install -r requirements.txt
                 
             - name: run pipeline
+              env:
+                DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
               run: |
-                dvc repro    
+                dvc repro  
+                
+            - name: model register test and performance
+              env:
+                DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
+              run: |
+                pytest tests/test_models.py    
+
+            - name: promote model to production
+              if: success()
+              env:
+                DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
+              run: |
+                python scripts/promote.py     
+
+            - name: Run Flask app tests
+              if: success()
+              env:
+                DAGSHUB_PAT: ${{ secrets.DAGSHUB_PAT }}
+              run: |
+                pytest tests/test_flask_app.py     

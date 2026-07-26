@@ -11,21 +11,30 @@ import mlflow.sklearn
 # import dagshub
 import os
 
-# # Set up DagsHub credentials for MLflow tracking
-# dagshub_token = os.getenv("DAGSHUB_PAT")
-# if not dagshub_token:
-#     raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
 
-# os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-# os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+from dotenv import load_dotenv
 
-# dagshub_url = "https://dagshub.com"
-# repo_owner = "campusx-official"
-# repo_name = "mlops-mini-project"
+load_dotenv()
+
+# mlflow.set_tracking_uri('http://127.0.0.1:5000/')
+
+dagshub_token = os.getenv("DAGSHUB_PAT")
+if not dagshub_token:
+        raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "AdityaMali918"
+repo_name = "mlops_mini_project"
 
 # Set up MLflow tracking URI
-# mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
-mlflow.set_tracking_uri('http://127.0.0.1:5000/')
+mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+
+client = mlflow.MlflowClient()
+
+# mlflow.set_tracking_uri('http://127.0.0.1:5000/')
 # logging configuration
 logger = logging.getLogger('model_evaluation')
 logger.setLevel('DEBUG')
