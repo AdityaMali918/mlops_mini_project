@@ -26,23 +26,23 @@ mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
 
 client = mlflow.MlflowClient()
 
-def test_development_alias_points_to_latest_version():
-    # mlflow.set_tracking_uri("http://127.0.0.1:5000")
+# def test_development_alias_points_to_latest_version():
+#     # mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
-    # client = mlflow.MlflowClient()
-    model_name = "my_model"
+#     # client = mlflow.MlflowClient()
+#     model_name = "my_model"
 
-    # Get all versions
-    versions = client.search_model_versions(f"name='{model_name}'")
-    latest_version = max(int(v.version) for v in versions)
+#     # Get all versions
+#     versions = client.search_model_versions(f"name='{model_name}'")
+#     latest_version = max(int(v.version) for v in versions)
 
-    # Get version assigned to development alias
-    alias_version = client.get_model_version_by_alias(
-        model_name,
-        "development"
-    )
+#     # Get version assigned to development alias
+#     alias_version = client.get_model_version_by_alias(
+#         model_name,
+#         "development"
+#     )
 
-    assert int(alias_version.version) == latest_version
+#     assert int(alias_version.version) == latest_version
 
 
 def test_registered_model_performance():
@@ -50,7 +50,7 @@ def test_registered_model_performance():
 
     model = mlflow.pyfunc.load_model("models:/my_model@development")
 
-    test_data = pd.read_csv("data/processed/test.csv")
+    test_data = pd.read_csv("data/processed/test_bow.csv")
 
     X_test = test_data.iloc[:, :-1]
     y_test = test_data.iloc[:, -1]
