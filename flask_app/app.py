@@ -327,7 +327,7 @@ def normalize_text(text):
 def home():
 
     return render_template(
-        "index.html"
+        "index.html",result=None
     )
 
 
@@ -383,6 +383,6 @@ def predict():
 if __name__ == "__main__":
 
     app.run(
-        port=8000,
-        debug=True
+        port=5000,
+        host="0.0.0.0",
     )
