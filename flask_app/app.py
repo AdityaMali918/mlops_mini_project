@@ -147,6 +147,9 @@ app = Flask(__name__)
 # -----------------------------
 load_dotenv()
 
+from nltk.stem import WordNetLemmatizer
+WordNetLemmatizer().lemmatize("warmup")
+
 dagshub_token = os.getenv("DAGSHUB_PAT")
 
 if not dagshub_token:
@@ -180,38 +183,38 @@ MODEL_ALIAS = os.getenv(
 )
 
 
-# -----------------------------
-# Lazy loaded artifacts
-# -----------------------------
-model = None
-vectorizer = None
+print("Loading MLflow model...")
+model = mlflow.sklearn.load_model(f"models:/{REGISTERED_MODEL_NAME}@{MODEL_ALIAS}")
 
+print("Loading vectorizer...")
+with open("models/vectorizer.pkl", "rb") as file:
+    vectorizer = pickle.load(file)
 
-def load_artifacts():
-    """
-    Load MLflow model and vectorizer only when prediction is requested.
-    """
+# def load_artifacts():
+#     """
+#     Load MLflow model and vectorizer only when prediction is requested.
+#     """
 
-    global model
-    global vectorizer
+#     global model
+#     global vectorizer
 
-    if model is None:
-        print("Loading MLflow model...")
+#     if model is None:
+#         print("Loading MLflow model...")
 
-        model = mlflow.sklearn.load_model(
-            f"models:/{REGISTERED_MODEL_NAME}@{MODEL_ALIAS}"
-        )
+#         model = mlflow.sklearn.load_model(
+#             f"models:/{REGISTERED_MODEL_NAME}@{MODEL_ALIAS}"
+#         )
 
-    if vectorizer is None:
-        print("Loading vectorizer...")
+#     if vectorizer is None:
+#         print("Loading vectorizer...")
 
-        with open(
-            "models/vectorizer.pkl",
-            "rb"
-        ) as file:
-            vectorizer = pickle.load(file)
+#         with open(
+#             "models/vectorizer.pkl",
+#             "rb"
+#         ) as file:
+#             vectorizer = pickle.load(file)
 
-    return model, vectorizer
+#     return model, vectorizer
 
 
 
@@ -338,7 +341,7 @@ def home():
 )
 def predict():
 
-    model, vectorizer = load_artifacts()
+    # model, vectorizer = load_artifacts()
 
     text = request.form["text"]
 
