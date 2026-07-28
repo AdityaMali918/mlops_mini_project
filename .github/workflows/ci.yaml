@@ -92,5 +92,6 @@ jobs:
                   docker run -d \
                     --name my-app \
                     --restart unless-stopped \
-                    -p 80:3000 \
+                    -p 80:5000 \
+                    -e DAGSHUB_PAT=${{ secrets.DAGSHUB_PAT }} \
                     501315282159.dkr.ecr.ap-south-1.amazonaws.com/mlop_ecr:latest 
