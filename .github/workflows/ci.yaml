@@ -74,3 +74,23 @@ jobs:
             - name: Push this image to your newly created AWS repository
               run: |
                 docker push 501315282159.dkr.ecr.ap-south-1.amazonaws.com/mlop_ecr:latest
+
+            - name: Deploy on EC2
+              uses: appleboy/ssh-action@v1.2.0
+              with:
+                host: ${{ secrets.EC2_HOST }}
+                username: ec2-user
+                key: ${{ secrets.EC2_SSH_KEY }}
+                script: |
+                  aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 501315282159.dkr.ecr.ap-south-1.amazonaws.com
+
+                  docker pull 501315282159.dkr.ecr.ap-south-1.amazonaws.com/mlop_ecr:latest
+
+                  docker stop my-app || true
+                  docker rm my-app || true
+
+                  docker run -d \
+                    --name my-app \
+                    --restart unless-stopped \
+                    -p 80:3000 \
+                    501315282159.dkr.ecr.ap-south-1.amazonaws.com/mlop_ecr:latest 
